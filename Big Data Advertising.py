@@ -48,6 +48,15 @@ df_transformed = (
         )
         .otherwise(F.lit("High Income")),
     )
+    .withColumn(
+        "Time Spent Category",
+        F.when(col("Site Engagement Ratio") < 20, F.lit("Low Engagement"))
+        .when(
+            (col("Site Engagement Ratio") >= 20) & (col("Site Engagement Ratio") < 50),
+            F.lit("Medium Engagement"),
+        )
+        .otherwise(F.lit("High Engagement")),
+    )
 )
 
 df_transformed.show(15)
