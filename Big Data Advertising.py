@@ -57,6 +57,7 @@ df_transformed = (
         )
         .otherwise(F.lit("High Engagement")),
     )
+    
 )
 
 # df_transformed.show(15)
@@ -87,3 +88,14 @@ time_spent_df = df_transformed.groupBy("Time Spent Category", "Gender").agg(
     F.round(F.avg("Age"),1).alias("Avg Age")
 )
 time_spent_df.show()
+
+# Summarize Engagement Levels by country
+country_engagement_df = df_transformed.groupBy("Country").agg(
+    F.round(F.avg("Site Engagement Ratio"),2).alias("Avg Engagement Ratio"),
+    F.count(F.when(F.col("Clicked on Ad") == "Yes", 1)).alias("Total Clicks"),
+)
+country_engagement_df.show()
+
+
+
+
