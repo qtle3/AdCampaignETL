@@ -2,6 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
 from pyspark.sql.window import Window
+import pandas as pd
+
 
 # Initialize Spark Session
 spark = SparkSession.builder \
@@ -96,6 +98,26 @@ country_engagement_df = df_transformed.groupBy("Country").agg(
 )
 country_engagement_df.show()
 
+# Define a dictionary of DataFrames and their respective filenames
+dataframes = {
+    "age_gender_summary": age_gender_df,
+    "income_level_summary": income_level_df,
+    "ad_topic_summary": ad_topic_df,
+    "time_spent_summary": time_spent_df,
+    "country_engagement_summary": country_engagement_df,
+}
 
+# Base output directory
+base_output_path = r"C:\Users\Q\Documents\Important Stuff\Python Work\Projects\2025 Python Projects\AdCampaign"
 
+# Export each DataFrame to CSV
+for name, df in dataframes.items():
+    # Convert PySpark DataFrame to Pandas
+    df_pd = df.toPandas()
 
+    # Define the output file path
+    output_path = f"{base_output_path}\\{name}.csv"
+
+    # Save as CSV
+    df_pd.to_csv(output_path, index=False)
+    print(f"CSV saved to {output_path}")
