@@ -41,9 +41,9 @@ df_transformed = (
     )
     .withColumn(
         "Income Bracket",
-        F.when(col("Area Income") < 30000, F.lit("Lower Income"))
+        F.when(col("Area Income") < 35000, F.lit("Lower Income"))
         .when(
-            (col("Area Income") >= 30000) & (col("Area Income") < 70000),
+            (col("Area Income") >= 35000) & (col("Area Income") < 65000),
             F.lit("Middle Income"),
         )
         .otherwise(F.lit("High Income")),
@@ -66,12 +66,24 @@ age_gender_df = df_transformed.groupBy("Age Group", "Gender").agg(
     F.round(F.avg("Site Engagement Ratio"),2).alias("Avg Engagement Ratio"),
     F.count(F.when(F.col("Clicked on Ad") == "Yes", 1)).alias("Total Clicks")
 )
-age_gender_df.show(15)
+age_gender_df.show()
 
 # Summarize user engagement by income levels
 income_level_df = df_transformed.groupBy("Income Bracket").agg(
     F.round(F.avg("Daily Internet Usage"),2).alias("Avg Daily Internet Usage"),
     F.count(F.when(F.col("Clicked on Ad") == "Yes",1)).alias("Total Clicks")
 )
-
 income_level_df.show()
+
+# Analyze the performance of ad topics:
+ad_topic_df = df_transformed.groupBy("Ad Topic Line").agg(
+    F.avg("Site Engagement Ratio").alias("Avg Engagement Ratio"),
+    F.count(F.when(F.col("Clicked on Ad") == "Yes", 1)).alias("Total Clicks"),
+)
+ad_topic_df.show()
+# Engagement levels by different demographics
+time_spent_df = df_transformed.groupBy("Time Spent Category", "Gender").agg(
+    F.count("*").alias("Total Users"), 
+    F.round(F.avg("Age"),1).alias("Avg Age")
+)
+time_spent_df.show()
