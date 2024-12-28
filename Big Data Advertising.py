@@ -39,6 +39,15 @@ df_transformed = (
         .when((col("Age") >= 35) & (col("Age") < 50), F.lit("35-49"))
         .otherwise(F.lit("50+")),
     )
+    .withColumn(
+        "Income Bracket",
+        F.when(col("Area Income") < 30000, F.lit("Lower Income"))
+        .when(
+            (col("Area Income") >= 30000) & (col("Area Income") < 70000),
+            F.lit("Middle Income"),
+        )
+        .otherwise(F.lit("High Income")),
+    )
 )
 
 df_transformed.show(15)
