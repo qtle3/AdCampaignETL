@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
-
+from pyspark.sql.window import Window
 
 # Initialize Spark Session
 spark = SparkSession.builder \
@@ -59,4 +59,19 @@ df_transformed = (
     )
 )
 
-df_transformed.show(15)
+# df_transformed.show(15)
+
+# Summarized user engagement by age group and gender
+age_gender_df = df_transformed.groupBy("Age Group", "Gender").agg(
+    F.round(F.avg("Site Engagement Ratio"),2).alias("Avg Engagement Ratio"),
+    F.count(F.when(F.col("Clicked on Ad") == "Yes", 1)).alias("Total Clicks")
+)
+age_gender_df.show(15)
+
+# Summarize user engagement by income levels
+income_level_df = df_transformed.groupBy("Income Bracket").agg(
+    F.round(F.avg("Daily Internet Usage"),2).alias("Avg Daily Internet Usage"),
+    F.count(F.when(F.col("Clicked on Ad") == "Yes",1)).alias("Total Clicks")
+)
+
+income_level_df.show()
