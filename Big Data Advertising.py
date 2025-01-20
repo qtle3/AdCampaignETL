@@ -4,7 +4,8 @@ from pyspark.sql import functions as F
 from pyspark.sql.functions import *
 from pyspark.sql.window import Window
 import pandas as pd
-
+import boto3 as boto
+from botocore.exceptions import NoCredentialsError
 
 # Initialize Spark Session
 spark = SparkSession.builder \
@@ -13,9 +14,10 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 # File Path to your CSV file
-file_path = (
-    "C:/Users/Q/Documents/Important Stuff/Job Stuff/2025 Projects/advertising.csv"
-)
+file_path = "C:/Users/Q/Documents/Important Stuff/Python Work/Projects/2025 Python Projects/AdCampaign/advertising.csv"
+
+if not os.path.exists(file_path):
+    raise FileNotFoundError(f"The file at {file_path} does not exist.")
 # Read the CSV File
 df = spark.read.csv(file_path, header=True, inferSchema=True)
 
@@ -110,6 +112,27 @@ dataframes = {
 
 # Base output directory
 base_output_path = r"C:\Users\Q\Documents\Important Stuff\Python Work\Projects\2025 Python Projects\AdCampaign"
+s3_bucket = "qtle-projects"
+aws_region = "us-east-2" 
+s3_client = boto.client("s3", region_name=aws_region)
+
+def upload_to_s3(file_path, s3_key):
+    """
+    Uploads a file to an S3 bucket.
+
+    Args:
+    - file_path (str): The local path of the file to upload.
+    - s3_key (str): The destination key in the S3 bucket.
+    """
+    try:
+        s3_client.upload_file(file_path, s3_bucket, s3_key)
+        print(f"Uploaded {file_path} to s3://{s3_bucket}/{s3_key}")
+    except FileNotFoundError:
+        print(f"File {file_path} not found.")
+    except NoCredentialsError:
+        print("AWS credentials not found.")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
 
 # Export each DataFrame to CSV
 for name, df in dataframes.items():
@@ -134,3 +157,7 @@ for name, df in dataframes.items():
         # Save as CSV
         df_pd.to_csv(output_path, index=False)
         print(f"Created new CSV file at {output_path}")
+
+    #upload to s3
+    s3_key = f"{name}.csv"
+    upload_to_s3(output_path, s3_key)
