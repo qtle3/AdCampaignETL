@@ -122,7 +122,7 @@ for name, df in dataframes.items():
     if os.path.exists(output_path):
         # If the file exists, read it and append the new data
         existing_df = pd.read.csv(output_path)
-        combined_df = pd.conact([existing_df, df_pd], ignore_index=True)
+        combined_df = pd.concat([existing_df, df_pd], ignore_index=True)
 
         # Remove duplicates (optional, based on the use case)
         combined_df.drop_duplicates(inplace=True)
