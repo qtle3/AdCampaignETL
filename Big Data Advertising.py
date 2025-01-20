@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import *
@@ -118,6 +119,18 @@ for name, df in dataframes.items():
     # Define the output file path
     output_path = f"{base_output_path}\\{name}.csv"
 
-    # Save as CSV
-    df_pd.to_csv(output_path, index=False)
-    print(f"CSV saved to {output_path}")
+    if os.path.exists(output_path):
+        # If the file exists, read it and append the new data
+        existing_df = pd.read.csv(output_path)
+        combined_df = pd.conact([existing_df, df_pd], ignore_index=True)
+
+        # Remove duplicates (optional, based on the use case)
+        combined_df.drop_duplicates(inplace=True)
+        print(f"dropped duplicate csv {combined_df}")
+        # save back to the same file
+        combined_df.to_csv(output_path, index=False)
+        print(f"Appended data to {output_path}")
+    else:
+        # Save as CSV
+        df_pd.to_csv(output_path, index=False)
+        print(f"Created new CSV file at {output_path}")
